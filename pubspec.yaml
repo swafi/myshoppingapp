@@ -1,0 +1,34 @@
+name: Mazao_Connect
+description: A new Flutter project for Mazao Connect.
+
+publish_to: 'none' # Remove this line if you want to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.17.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  mysql_client: ^0.0.27
+  http: ^1.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+  # The Flutter Driver tests depend on the following packages
+  flutter_driver:
+    sdk: flutter
+  test: ^1.16.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/bac.jpeg
+    - assets/src.jpeg
+    - assets/url.jpeg
