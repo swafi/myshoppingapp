@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(Mazao_Connect());
@@ -193,6 +195,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
+  void _registerUser() async {
+    var url = Uri.parse('http://localhost:8000/services/api/users/');
+    var headers = {'Content-Type': 'application/json'};
+    var body = json.encode({
+      'username': _usernameController.text.trim(),
+      'email': _emailController.text.trim(),
+      'password': _passwordController.text,
+    });
+
+    try {
+      var response = await http.post(url, headers: headers, body: body);
+
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('User registered successfully')),
+        );
+        // Navigate to another screen after successful registration if needed
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Registration failed')),
+        );
+      }
+    } catch (e) {
+      print('Error during registration: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error during registration')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -248,9 +280,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Registering...')),
-                    );
+                    // If all fields are valid, register user
+                    _registerUser();
                   }
                 },
                 child: Text(
