@@ -1,3 +1,6 @@
+
+
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -128,7 +131,7 @@ class BrowseProductsScreen extends StatelessWidget {
           'Browse Products',
           style: TextStyle(
             fontWeight: FontWeight.bold, // Bold text
-          ), 
+          ),
         ),
         backgroundColor: Colors.green, // Background color
       ),
@@ -196,7 +199,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _registerUser() async {
-    var url = Uri.parse('http://localhost:8000/services/api/users/');
+    var url = Uri.parse('https://mazao.onrender.com/mazao/api/users/');
     var headers = {'Content-Type': 'application/json'};
     var body = json.encode({
       'username': _usernameController.text.trim(),
