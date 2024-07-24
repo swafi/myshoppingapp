@@ -1,6 +1,3 @@
-
-
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -108,18 +105,26 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+class Product {
+  final String name;
+  final String imageUrl;
+  final double price;
+
+  Product({required this.name, required this.imageUrl, required this.price});
+}
+
 class BrowseProductsScreen extends StatelessWidget {
-  final Map<String, List<String>> products = {
+  final Map<String, List<Product>> products = {
     'Chicken': [
-      'Broiler Chicken',
-      'Boneless Broiler',
-      'Kienyeji Chicken',
-      'Ex-Broiler'
+      Product(name: 'Broiler Chicken', imageUrl: 'assets/broiler1.jpg', price: 500.00),
+      Product(name: 'Boneless Broiler', imageUrl: 'assets/boness1.jpg', price: 600.00),
+      Product(name: 'Kienyeji Chicken', imageUrl: 'assets/kienyeji.jpg', price: 700.00),
+      Product(name: 'Ex-Broiler', imageUrl: 'assets/ex broilers1.jpg', price: 400.00),
     ],
     'Fish': [
-      'Tilapia',
-      'Catfish',
-      'Fish Fillet'
+      Product(name: 'Tilapia', imageUrl: 'assets/tilapia.jpg', price: 300.00),
+      Product(name: 'Catfish', imageUrl: 'assets/catfish.jpg', price: 400.00),
+      Product(name: 'Fish Fillet', imageUrl: 'assets/fish fillet.jpg', price: 500.00),
     ],
   };
 
@@ -158,15 +163,30 @@ class BrowseProductsScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                children: products[category]!.map((item) {
+                children: products[category]!.map((product) {
                   return ListTile(
                     title: Text(
-                      item,
+                      product.name,
                       style: TextStyle(
                         color: Colors.black, // Changed text color to black
                         fontSize: 25.0, // Font size for sub-items
                         fontWeight: FontWeight.bold,
                       ),
+                    ),
+                    leading: Image.asset(
+                      product.imageUrl,
+                      width: 100,
+                      height: 100,
+                    ),
+                    subtitle: Text(
+                      'Ksh ${product.price.toString()}',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    trailing: QuantitySelector(
+                      product: product,
                     ),
                   );
                 }).toList(),
@@ -175,6 +195,58 @@ class BrowseProductsScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class QuantitySelector extends StatefulWidget {
+  final Product product;
+
+  QuantitySelector({required this.product});
+
+  @override
+  _QuantitySelectorState createState() => _QuantitySelectorState();
+}
+
+class _QuantitySelectorState extends State<QuantitySelector> {
+  int quantity = 0; // Set initial quantity to 0
+
+  void _addToCart() {
+    // Implement cart addition logic
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('${widget.product.name} added to cart with quantity $quantity')),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: Icon(Icons.remove),
+          onPressed: () {
+            if (quantity > 0) {
+              setState(() {
+                quantity--;
+              });
+            }
+          },
+        ),
+        Text('$quantity'),
+        IconButton(
+          icon: Icon(Icons.add),
+          onPressed: () {
+            setState(() {
+              quantity++;
+            });
+          },
+        ),
+        ElevatedButton(
+          onPressed: _addToCart,
+          child: Text('Add to Cart'),
+        ),
+      ],
     );
   }
 }
@@ -279,21 +351,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 30),
+              SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    // If all fields are valid, register user
                     _registerUser();
                   }
                 },
-                child: Text(
-                  'Register',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold, // Bold text
-                  ),
-                ),
+                child: Text('Register'),
               ),
             ],
           ),
@@ -310,14 +375,43 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void _loginUser() async {
+    var url = Uri.parse('https://mazao.onrender.com/mazao/api/users/login/');
+    var headers = {'Content-Type': 'application/json'};
+    var body = json.encode({
+      'username': _usernameController.text.trim(),
+      'password': _passwordController.text,
+    });
+
+    try {
+      var response = await http.post(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('User logged in successfully')),
+        );
+        // Navigate to another screen after successful login if needed
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login failed')),
+        );
+      }
+    } catch (e) {
+      print('Error during login: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error during login')),
+      );
+    }
   }
 
   @override
@@ -339,13 +433,11 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             children: <Widget>[
               TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+                controller: _usernameController,
+                decoration: InputDecoration(labelText: 'Username'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                    return 'Please enter a valid email';
+                    return 'Please enter your username';
                   }
                   return null;
                 },
@@ -361,22 +453,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 30),
+              SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Logging in...')),
-                    );
+                    _loginUser();
                   }
                 },
-                child: Text(
-                  'Login',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold, // Bold text
-                  ),
-                ),
+                child: Text('Login'),
               ),
             ],
           ),

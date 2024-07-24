@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
         android:label="myshoppingapp"
-        android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:name="${MazaoConnect}"
+        android:icon="@mipmap/ic-launcher">
         <activity
             android:name=".MainActivity"
             android:exported="true"
